@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  api:
+    image: api
+    environment:
+      OTEL_SERVICE_NAME: api
+      OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    expose:
+      - 8080
+    container_name: api
+    networks:
+      - issue
+    command: ["python", "run_api.py"]
+  worker:
+    image: worker
+    environment:
+      OTEL_SERVICE_NAME: worker
+      OTEL_EXPORTER_OTLP_ENDPOINT: "otel-collector:4317"
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: ["celery", "-A", "application.worker.capp", "worker", "-l", "info"]
+    container_name: worker
+    networks:
+      - issue
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - issue
+    container_name: issue-redis
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    ports:
+      - "4317:4317"
+    networks:
+      - issue
+
+networks:
+  issue:
