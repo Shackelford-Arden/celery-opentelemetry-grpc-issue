@@ -32,7 +32,10 @@ def init_celery_tracing(*args, **kwargs):  # pylint: disable=unused-argument
     )
 
 
-capp = Celery("capp", broker='redis://issue-redis:6379', backend='redis://issue-redis:6379', task_cls=AppTask)
+capp = Celery(
+    "capp", broker='redis://issue-redis:6379',
+    backend='redis://issue-redis:6379', task_cls=AppTask
+)
 
 
 @capp.task(bind=True)
